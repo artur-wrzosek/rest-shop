@@ -1,8 +1,22 @@
 from django.db import models
+from django.contrib.auth.models import User
+
+
+class BaseUser(User):
+    BUYER = "BUYER"
+    SELLER = "SELLER"
+    ROLE_CHOICES = (
+        (BUYER, "Buyer"),
+        (SELLER, "Seller"),
+    )
+
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES)
 
 
 class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -34,7 +48,7 @@ class OrderList(BaseModel):
 
 
 class Order(BaseModel):
-    client = models.ForeignKey(on_delete=models.DO_NOTHING)
+    client = models.ForeignKey(to=BaseUser, on_delete=models.DO_NOTHING)
     address = models.CharField(max_length=100)
     order_list = models.OneToOneField(to=OrderList, on_delete=models.CASCADE)
     payment_date = models.DateField()
