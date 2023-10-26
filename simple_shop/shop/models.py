@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from permissions import BUYER_PERMISSIONS
+
 
 class BaseUser(User):
     BUYER = "BUYER"
@@ -13,6 +15,12 @@ class BaseUser(User):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES)
+
+
+class Buyer(BaseUser):
+
+    class Meta:
+        permissions = BUYER_PERMISSIONS
 
 
 class BaseModel(models.Model):

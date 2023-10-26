@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework.permissions import BasePermission
 
 
-BUYERS_PERMISSIONS = (
+BUYER_PERMISSIONS = (
     ("get_product", "Get product"),
     ("post_product", "Post product"),
     ("update_product", "Update product"),
@@ -11,7 +11,7 @@ BUYERS_PERMISSIONS = (
 )
 
 
-class BuyersPermissions(BasePermission):
+class BuyerPermissions(BasePermission):
     ACTIONS = {
         "get_product": "buyer.get_product",
         "post_product": "buyer.post_product",
@@ -29,4 +29,4 @@ class BuyersPermissions(BasePermission):
 class BuyersGroup(Group):
     BUYERS = "BUYERS"
     name = models.CharField(max_length=15, default=BUYERS)
-    permissions = BuyersPermissions
+    permissions = BuyerPermissions
