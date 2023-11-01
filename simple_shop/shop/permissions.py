@@ -1,32 +1,37 @@
-from django.db import models
-from django.contrib.auth.models import Group
 from rest_framework.permissions import BasePermission
 
 
-BUYER_PERMISSIONS = (
-    ("get_product", "Get product"),
-    ("post_product", "Post product"),
-    ("update_product", "Update product"),
-    ("delete_product", "Delete product"),
-)
+PRODUCT_VIEW_PERMISSION = ("view_product", "Can view product")
+PRODUCT_LIST_PERMISSION = ("list_product", "Can view list of products")
+PRODUCT_CREATE_PERMISSION = ("create_product", "Can create product")
+PRODUCT_UPDATE_PERMISSION = ("update_product", "Can update product")
+PRODUCT_DELETE_PERMISSION = ("delete_product", "Can delete product")
+ORDER_CREATE_PERMISSION = ("create_order", "Can create order")
+STATISTICS_VIEW_PERMISSION = ("view_statistics", "Can view statistics")
 
 
-class BuyerPermissions(BasePermission):
-    ACTIONS = {
-        "get_product": "buyer.get_product",
-        "post_product": "buyer.post_product",
-        "update_product": "buyer.update_product",
-        "delete_product": "buyer.delete_product",
-    }
+class ProductCreatePermissions(BasePermission):
+    PERMISSIONS = ["shop.create_product"]
 
     def has_permission(self, request, view):
-        return self.ACTIONS.get(view.action, "") in request.user.get_all_permissions()
-
-    def has_object_permission(self, request, view, obj):
-        return
+        return self.PERMISSIONS in request.user.get_all_permissions()
 
 
-class BuyersGroup(Group):
-    BUYERS = "BUYERS"
-    name = models.CharField(max_length=15, default=BUYERS)
-    permissions = BuyerPermissions
+class ProductUpdateDeletePermissions(BasePermission):
+    PERMISSIONS = ["shop.update_product", "shop.delete_product"]
+
+    def has_permission(self, request, view):
+        return self.PERMISSIONS in request.user.get_all_permissions()
+
+
+class OrderCreatePermissions(BasePermission):
+    PERMISSIONS = ["shop.create_order"]
+
+    def has_permission(self, request, view):
+        return self.PERMISSIONS in request.user.get_all_permissions()
+
+
+class StatisticsViewPermissions(BasePermission):
+    def has_permission(self, request, view):
+        return STATISTICS_VIEW_PERMISSION in request.user.get_all_permissions()
+
