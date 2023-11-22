@@ -1,8 +1,9 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from .models import BaseUser, Product, Category
+from .models import BaseUser, Product, Category, Order
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -51,18 +52,60 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         category = validated_data.pop("category", None)
         if category:
-            category, created = Category.objects.get_or_create(name=category)
-        product = Product.objects.create(category=category, **validated_data)
+            category, created = Category.objects.get_or_create(
+                name=category["name"],
+                created_by=self.context["request"].user,
+            )
+        product, created = Product.objects.get_or_create(
+            category=category,
+            created_by=self.context["request"].user,
+            **validated_data,
+        )
         return product
 
 
 class ProductRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ["id"]
+        fields = "__all__"
 
 
-class ProductUpdateDeleteSerializer(serializers.ModelSerializer):
+class ProductListRetrieveSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(max_length=50, allow_null=True)
+    description = serializers.CharField(max_length=200, allow_null=True)
+    price_min = serializers.DecimalField(max_digits=6, decimal_places=2, min_value=0, allow_null=True)
+    price_max = serializers.DecimalField(max_digits=6, decimal_places=2, min_value=0, allow_null=True)
+
+    class Meta:
+        model = Product
+        fields = ["name", "price", "price_min", "price_max", "category", "description"]
+        extra_kwargs = {
+            "name": {
+                "required": False,
+                "allow_blank": True
+            },
+            "price": {
+                "required": False,
+            }
+        }
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ["name", "description", "price", "category", "photo_url"]
+
+
+class ProductDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ["id"]
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = "__all__"
+
+    def create(self, validated_data):
+        order = Order.objects.create()
