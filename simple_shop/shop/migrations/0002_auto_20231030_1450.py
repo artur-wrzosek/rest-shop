@@ -14,9 +14,6 @@ ROLE_PERMISSIONS = [
 def add_groups_with_permissions(apps, schema_editor):
     """
     Creating instances of Group classes with given list of GroupPermissions
-    :param apps:
-    :param schema_editor:
-    :return:
     """
     for role in ROLE_PERMISSIONS:
         group, group_created = Group.objects.get_or_create(name=role.GROUP_NAME)
