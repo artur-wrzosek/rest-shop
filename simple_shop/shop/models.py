@@ -17,13 +17,16 @@ class BaseUser(AbstractUser):
 
 
 class BaseModel(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(to=BaseUser, on_delete=models.SET_NULL, null=True)
+
+    objects = models.Manager()
 
     class Meta:
         abstract = True
 
 
-class Category(models.Model):
+class Category(BaseModel):
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -31,7 +34,7 @@ class Category(models.Model):
 
 
 class Product(BaseModel):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     description = models.TextField(max_length=200, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.ForeignKey(to=Category, related_name="products", on_delete=models.SET_NULL, null=True)
@@ -43,19 +46,16 @@ class Product(BaseModel):
 
 
 class OrderItem(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(to=Product, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveSmallIntegerField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     summary_price = models.DecimalField(max_digits=6, decimal_places=2)
-    order_list = models.ForeignKey("OrderList", on_delete=models.CASCADE)
-
-
-class OrderList(BaseModel):
-    final_price = models.DecimalField(max_digits=6, decimal_places=2)
+    order = models.ForeignKey("Order", related_name="order_items", on_delete=models.CASCADE)
 
 
 class Order(BaseModel):
-    client = models.ForeignKey(to=BaseUser, on_delete=models.SET_NULL, null=True)
-    address = models.CharField(max_length=100)
-    order_list = models.OneToOneField(to=OrderList, on_delete=models.CASCADE)
+    buyer_address = models.CharField(max_length=100)
+    final_price = models.DecimalField(max_digits=6, decimal_places=2)
     payment_date = models.DateField()
+    is_paid = models.BooleanField(default=False)
+    is_sent = models.BooleanField(default=False)
